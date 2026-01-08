@@ -1,0 +1,33 @@
+{
+    "nav": {
+        "home": "Home",
+        "dashboard": "Dashboard",
+        "landRental": "Rental",
+        "jobs": "Jobs",
+        "community": "Community",
+        "shop": "Shop",
+        "cropDoctor": "Doctor",
+        "aiAdvisor": "Advisor",
+        "login": "Login",
+        "loginSignup": "Login / Sign Up"
+    },
+    "hero": {
+        "title": "Empowering Agriculture with AI",
+        "subtitle": "One stop solution for farmers - Crop Disease Detection, AI Advisory, Market Analysis, and Community Support.",
+        "getStarted": "Get Started",
+        "learnMore": "Learn More"
+    },
+    "ai": {
+        "advisorTitle": "AI Agriculture Advisor",
+        "advisorSubtitle": "Your personal 24x7 farming expert",
+        "uploadTitle": "Upload Photo",
+        "analyzeButton": "Analyze Crop",
+        "analyzing": "Analyzing...",
+        "results": "Analysis Results",
+        "disease": "Identified Disease",
+        "treatment": "Treatment",
+        "prevention": "Prevention",
+        "confidence": "Confidence",
+        "placeholder": "Ask your question here..."
+    }
+}

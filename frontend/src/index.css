@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Krishi Sanchay - Agricultural Platform Design System 
+All colors MUST be HSL. Agricultural theme with greens and earth tones.
+*/
+
+@layer base {
+  :root {
+    /* Agricultural Color Palette */
+    --background: 50 50% 98%;
+    --foreground: 120 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 15% 15%;
+
+    /* Primary - Fresh Green */
+    --primary: 120 65% 25%;
+    --primary-foreground: 0 0% 98%;
+    --primary-glow: 120 65% 35%;
+
+    /* Secondary - Earth Brown */
+    --secondary: 30 25% 85%;
+    --secondary-foreground: 120 15% 15%;
+
+    /* Muted - Light Sage */
+    --muted: 90 15% 92%;
+    --muted-foreground: 120 10% 45%;
+
+    /* Accent - Golden Wheat */
+    --accent: 45 85% 65%;
+    --accent-foreground: 30 15% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 120 15% 88%;
+    --input: 120 15% 88%;
+    --ring: 120 65% 25%;
+
+    --radius: 0.75rem;
+
+    /* Agricultural Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(120 65% 25%), hsl(120 65% 35%));
+    --gradient-earth: linear-gradient(135deg, hsl(30 45% 45%), hsl(45 55% 55%));
+    --gradient-sky: linear-gradient(135deg, hsl(200 70% 85%), hsl(220 80% 90%));
+    --gradient-harvest: linear-gradient(135deg, hsl(45 85% 65%), hsl(50 90% 70%));
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px hsl(120 20% 20% / 0.1);
+    --shadow-glow: 0 0 30px hsl(120 65% 35% / 0.2);
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    /* Dark mode for agricultural theme */
+    --background: 120 15% 8%;
+    --foreground: 50 30% 92%;
+
+    --card: 120 15% 10%;
+    --card-foreground: 50 30% 92%;
+
+    --primary: 120 65% 35%;
+    --primary-foreground: 120 15% 8%;
+
+    --secondary: 30 15% 20%;
+    --secondary-foreground: 50 30% 92%;
+
+    --muted: 120 10% 15%;
+    --muted-foreground: 120 8% 65%;
+
+    --accent: 45 85% 60%;
+    --accent-foreground: 30 15% 8%;
+
+    --border: 120 15% 18%;
+    --input: 120 15% 18%;
+    --ring: 120 65% 35%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* Ensure Lucide React icons are visible */
+  svg {
+    display: inline-block !important;
+    vertical-align: middle;
+  }
+
+  /* Lucide icons specific styling - High specificity */
+  svg[class*="lucide"],
+  .lucide {
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    fill: none !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+  }
+
+  /* Ensure SVGs in buttons and badges are visible */
+  button svg,
+  .btn-farm svg,
+  .badge svg,
+  a svg {
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+    display: inline-block !important;
+  }
+
+  /* Agricultural UI Patterns */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-earth {
+    background: var(--gradient-earth);
+  }
+
+  .gradient-sky {
+    background: var(--gradient-sky);
+  }
+
+  .gradient-harvest {
+    background: var(--gradient-harvest);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+}
+
+@layer components {
+
+  /* Agricultural Card Styles */
+  .farm-card {
+    @apply bg-card rounded-2xl shadow-soft border border-border/50 p-6 transition-smooth hover:shadow-glow hover:scale-[1.02];
+  }
+
+  /* Weather Widget Styles */
+  .weather-widget {
+    @apply gradient-sky text-white rounded-2xl p-6 shadow-soft;
+  }
+
+  /* Market Price Card */
+  .price-card {
+    @apply gradient-harvest text-accent-foreground rounded-2xl p-6 shadow-soft;
+  }
+
+  /* Agricultural Button Variants */
+  .btn-farm {
+    @apply gradient-primary text-primary-foreground rounded-xl px-6 py-3 font-semibold shadow-soft transition-smooth hover:shadow-glow hover:scale-105;
+  }
+
+  .btn-earth {
+    @apply gradient-earth text-white rounded-xl px-6 py-3 font-semibold shadow-soft transition-smooth hover:shadow-glow hover:scale-105;
+  }
+}
+
+@layer utilities {
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+
+  .animate-bounce-soft {
+    animation: bounceSoft 2s infinite;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes bounceSoft {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+
+    40% {
+      transform: translateY(-10px);
+    }
+
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+}
+@layer utilities {
+  .bg-gradient-primary {
+    background-image: var(--gradient-primary);
+  }
+  .bg-gradient-earth {
+    background-image: var(--gradient-earth);
+  }
+  .bg-gradient-sky {
+    background-image: var(--gradient-sky);
+  }
+  .bg-gradient-harvest {
+    background-image: var(--gradient-harvest);
+  }
+}

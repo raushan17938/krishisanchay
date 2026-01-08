@@ -1,0 +1,33 @@
+{
+    "nav": {
+        "home": "ਘਰ",
+        "dashboard": "ਡੈਸ਼ਬੋਰਡ",
+        "landRental": "ਜ਼ਮੀਨ ਕਿਰਾਇਆ",
+        "jobs": "ਨੌਕਰੀਆਂ",
+        "community": "ਭਾਈਚਾਰਾ",
+        "shop": "ਦੁਕਾਨ",
+        "cropDoctor": "ਫਸਲ ਡਾਕਟਰ",
+        "aiAdvisor": "AI ਸਲਾਹਕਾਰ",
+        "login": "ਲੌਗਇਨ",
+        "loginSignup": "ਲੌਗਇਨ / ਸਾਈਨ ਅੱਪ"
+    },
+    "hero": {
+        "title": "AI ਨਾਲ ਖੇਤੀਬਾੜੀ ਨੂੰ ਮਜ਼ਬੂਤ ਬਣਾਉਣਾ",
+        "subtitle": "ਕਿਸਾਨਾਂ ਲਈ ਇੱਕ ਵਨ-ਸਟਾਪ ਹੱਲ - ਫਸਲ ਰੋਗ ਪਛਾਣ, AI ਸਲਾਹ, ਮੰਡੀ ਵਿਸ਼ਲੇਸ਼ਣ ਅਤੇ ਭਾਈਚਾਰਕ ਸਹਾਇਤਾ।",
+        "getStarted": "ਸ਼ੁਰੂ ਕਰੋ",
+        "learnMore": "ਹੋਰ ਜਾਣੋ"
+    },
+    "ai": {
+        "advisorTitle": "AI ਖੇਤੀਬਾੜੀ ਸਲਾਹਕਾਰ",
+        "advisorSubtitle": "ਤੁਹਾਡਾ ਨਿੱਜੀ 24x7 ਖੇਤੀ ਮਾਹਰ",
+        "uploadTitle": "ਫੋਟੋ ਅਪਲੋਡ ਕਰੋ",
+        "analyzeButton": "AI ਵਿਸ਼ਲੇਸ਼ਣ ਕਰੋ",
+        "analyzing": "ਵਿਸ਼ਲੇਸ਼ਣ ਹੋ ਰਿਹਾ ਹੈ...",
+        "results": "ਵਿਸ਼ਲੇਸ਼ਣ ਨਤੀਜੇ",
+        "disease": "ਪਛਾਣੀ ਗਈ ਬਿਮਾਰੀ",
+        "treatment": "ਇਲਾਜ",
+        "prevention": "ਰੋਕਥਾਮ",
+        "confidence": "ਭਰੋਸੇਯੋਗਤਾ",
+        "placeholder": "ਆਪਣਾ ਸਵਾਲ ਇੱਥੇ ਲਿਖੋ..."
+    }
+}

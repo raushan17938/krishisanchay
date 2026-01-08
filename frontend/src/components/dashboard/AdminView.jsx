@@ -1,0 +1,834 @@
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Users, ShoppingBag, FileText, AlertTriangle, Store, Tractor, MapPin, Phone, Filter, MoreHorizontal, Package, Tag, IndianRupee } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getUsers, updateUserStatus } from "../../api/admin";
+import { getProducts } from "../../api/product";
+import { getPosts, deletePost } from "../../api/posts";
+import { toast } from "sonner";
+
+/**
+ * AdminView Component
+ * Displays platform overview, user management, seller requests, and product management
+ */
+const AdminView = () => {
+    const [activeTab, setActiveTab] = useState("overview");
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
+    // Data States
+    const [users, setUsers] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [posts, setPosts] = useState([]);
+    // Mock requests for now (Seller Requests API needed later)
+    const [requests, setRequests] = useState([
+        { _id: '101', user: 'Mahesh Farmer', type: 'farmer', status: 'pending', date: '2024-03-25', details: '5 Acres Land, Wheat/Rice' },
+        { _id: '102', user: 'City Seeds', type: 'shopkeeper', status: 'pending', date: '2024-03-24', details: 'Shop: City Seeds, Lic: 12345' }
+    ]);
+    const [stats, setStats] = useState({ totalUsers: 0, totalProducts: 0, totalPosts: 0 });
+
+    // User Filter States
+    const [roleFilter, setRoleFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
+
+    // Product Filter States
+    const [categoryFilter, setCategoryFilter] = useState("all");
+    const [stockFilter, setStockFilter] = useState("all");
+    const [dateFilter, setDateFilter] = useState("all");
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Users
+                const usersRes = await getUsers();
+                if (usersRes.data.success) {
+                    const mappedUsers = usersRes.data.data.map(u => ({
+                        ...u,
+                        image: u.avatar || u.image,
+                        address: u.location ? `${u.location.district || ''}, ${u.location.state || ''}` : u.address || 'N/A'
+                    }));
+                    setUsers(mappedUsers);
+                }
+
+                // Fetch Products
+                const productsData = await getProducts();
+                if (productsData.success) {
+                    const mappedProducts = productsData.data.map(p => ({
+                        ...p,
+                        stock: p.countInStock > 5 ? 'In Stock' : p.countInStock > 0 ? 'Low Stock' : 'Out of Stock',
+                        seller: p.seller?.name || 'Unknown',
+                        unit: 'unit'
+                    }));
+                    setProducts(mappedProducts);
+                }
+
+                // Fetch Posts
+                const postsRes = await getPosts();
+                if (postsRes.data.success) {
+                    const mappedPosts = postsRes.data.data.map(p => ({
+                        ...p,
+                        author: p.author?.name || 'Unknown',
+                        authorRole: p.author?.role || 'user',
+                        likes: p.likes.length,
+                        comments: p.comments.length,
+                        date: new Date(p.createdAt).toISOString().split('T')[0],
+                        timestamp: p.createdAt
+                    }));
+                    setPosts(mappedPosts);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch admin data", error);
+                // toast.error("Failed to load dashboard data");
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Update stats whenever data changes
+    useEffect(() => {
+        setStats({
+            totalUsers: users.length,
+            totalProducts: products.length,
+            totalPosts: posts.length
+        });
+    }, [users, products, posts]);
+
+    // Filtering Logic Users
+    const filteredUsers = users.filter(user => {
+        const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+        const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+        return matchesRole && matchesStatus;
+    });
+
+    // Filtering Logic Products
+    const filteredProducts = products.filter(product => {
+        const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
+        const matchesStock = stockFilter === 'all' ||
+            (stockFilter === 'In Stock' && (product.stock === 'In Stock' || product.stock === 'Available')) ||
+            (stockFilter === 'Out of Stock' && product.stock === 'Out of Stock');
+        return matchesCategory && matchesStock;
+    });
+
+    // Filtering Logic Posts
+    const filteredPosts = posts.filter(post => {
+        if (dateFilter === 'all') return true;
+        const postDate = new Date(post.timestamp);
+        const now = new Date();
+        const diffTime = Math.abs(now - postDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (dateFilter === '24h') return diffDays <= 1;
+        if (dateFilter === 'week') return diffDays <= 7;
+        if (dateFilter === 'month') return diffDays <= 30;
+        return true;
+    });
+
+    const handleDeletePost = async (postId) => {
+        if (!window.confirm("Are you sure?")) return;
+        try {
+            await deletePost(postId);
+            setPosts(posts.filter(p => p._id !== postId));
+            toast.success("Post deleted");
+        } catch (error) {
+            toast.error("Failed to delete post");
+        }
+    };
+
+    const handleStatusChange = async (userId, newStatus, e) => {
+        e.stopPropagation();
+        try {
+            await updateUserStatus(userId, newStatus);
+            setUsers(users.map(u => u._id === userId ? { ...u, status: newStatus } : u));
+            toast.success(`User marked as ${newStatus}`);
+        } catch (error) {
+            toast.error("Failed to update status");
+        }
+    };
+
+    const handleRequestAction = (reqId, action) => {
+        setRequests(requests.map(r => r._id === reqId ? { ...r, status: action } : r));
+    };
+
+    const handleDeliver = async (orderId) => {
+        alert(`OTP sent to user for Order #${orderId}`);
+    };
+
+    const scrollToUsers = () => {
+        setActiveTab("overview");
+        setTimeout(() => {
+            const element = document.getElementById('user-management');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 100);
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Tab Navigation */}
+            <div className="flex gap-2 border-b overflow-x-auto">
+                <Button
+                    variant={activeTab === 'overview' ? 'default' : 'ghost'}
+                    onClick={() => setActiveTab('overview')}
+                    className="rounded-b-none"
+                >
+                    Overview & Users
+                </Button>
+                <Button
+                    variant={activeTab === 'products' ? 'default' : 'ghost'}
+                    onClick={() => setActiveTab('products')}
+                    className="rounded-b-none"
+                >
+                    Products List
+                </Button>
+                <Button
+                    variant={activeTab === 'posts' ? 'default' : 'ghost'}
+                    onClick={() => setActiveTab('posts')}
+                    className="rounded-b-none"
+                >
+                    Community Posts
+                </Button>
+                <Button
+                    variant={activeTab === 'requests' ? 'default' : 'ghost'}
+                    onClick={() => setActiveTab('requests')}
+                    className="rounded-b-none relative"
+                >
+                    Seller Requests
+                    {requests.filter(r => r.status === 'pending').length > 0 && (
+                        <span className="ml-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                            {requests.filter(r => r.status === 'pending').length}
+                        </span>
+                    )}
+                </Button>
+            </div>
+
+            {activeTab === 'overview' && (
+                <>
+                    <div className="grid md:grid-cols-4 gap-6">
+                        <Card
+                            className="p-6 cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={scrollToUsers}
+                            title="Click to manage users"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="bg-primary/10 p-3 rounded-full">
+                                    <Users className="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Total Users</p>
+                                    <h3 className="text-2xl font-bold">{stats?.totalUsers || 1250}</h3>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('products')}>
+                            <div className="flex items-center gap-4">
+                                <div className="bg-blue-100 p-3 rounded-full">
+                                    <ShoppingBag className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Products</p>
+                                    <h3 className="text-2xl font-bold">{stats?.totalProducts || 450}</h3>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="p-6 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setActiveTab('posts')}>
+                            <div className="flex items-center gap-4">
+                                <div className="bg-orange-100 p-3 rounded-full">
+                                    <FileText className="w-6 h-6 text-orange-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Active Posts</p>
+                                    <h3 className="text-2xl font-bold">{stats?.totalPosts || posts.length}</h3>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-red-100 p-3 rounded-full">
+                                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">To Review</p>
+                                    <h3 className="text-2xl font-bold">{requests.filter(r => r.status === 'pending').length}</h3>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+
+                    <div className="grid lg:grid-cols-3 gap-6">
+                        {/* User Management Table */}
+                        <Card id="user-management" className="lg:col-span-2 p-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                <h3 className="text-xl font-semibold">User Management</h3>
+                                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+
+                                    {/* Role Filter */}
+                                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                                            <SelectValue placeholder="Role" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Roles</SelectItem>
+                                            <SelectItem value="farmer">Farmer</SelectItem>
+                                            <SelectItem value="buyer">Buyer</SelectItem>
+                                            <SelectItem value="expert">Expert</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    {/* Status Filter */}
+                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                        <SelectTrigger className="w-[120px] h-8 text-xs">
+                                            <SelectValue placeholder="Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Status</SelectItem>
+                                            <SelectItem value="active">Active</SelectItem>
+                                            <SelectItem value="inactive">Inactive</SelectItem>
+                                            <SelectItem value="suspended">Suspended</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    <Button variant="outline" size="sm" className="h-8">Export CSV</Button>
+                                </div>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b text-left">
+                                            <th className="pb-3 font-medium text-muted-foreground w-[250px]">User</th>
+                                            <th className="pb-3 font-medium text-muted-foreground">Role</th>
+                                            <th className="pb-3 font-medium text-muted-foreground">Status</th>
+                                            <th className="pb-3 font-medium text-muted-foreground text-right pr-4">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {filteredUsers.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="4" className="py-8 text-center text-muted-foreground">
+                                                    No users matching filters
+                                                </td>
+                                            </tr>
+                                        ) : filteredUsers.map((user) => (
+                                            <tr
+                                                key={user._id}
+                                                className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
+                                                onClick={() => setSelectedUser(user)}
+                                            >
+                                                <td className="py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        {user.image ? (
+                                                            <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full object-cover shadow-sm" />
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-700">
+                                                                {user.name.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                        <div>
+                                                            <p className="font-medium text-sm">{user.name}</p>
+                                                            <p className="text-xs text-muted-foreground">{user.email}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4">
+                                                    <div className="flex flex-col">
+                                                        <span className={`px-2 py-1 rounded text-xs font-medium w-fit capitalize
+                                                ${user.role === 'expert' ? 'bg-purple-100 text-purple-700' :
+                                                                user.role === 'admin' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-700'}`}>
+                                                            {user.role}
+                                                        </span>
+                                                        {user.isVerifiedSeller && (
+                                                            <span className="text-[10px] text-green-600 font-medium mt-1">Verified Seller</span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="py-4">
+                                                    <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${user.status === 'active' ? 'bg-green-100 text-green-700' :
+                                                        user.status === 'suspended' ? 'bg-red-100 text-red-700' :
+                                                            'bg-yellow-100 text-yellow-700'
+                                                        }`}>
+                                                        {user.status}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 text-right">
+                                                    <div className="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {user.status !== 'active' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-7 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                                onClick={(e) => handleStatusChange(user._id, 'active', e)}
+                                                            >
+                                                                Activate
+                                                            </Button>
+                                                        )}
+                                                        {user.status === 'active' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-7 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                                                onClick={(e) => handleStatusChange(user._id, 'inactive', e)}
+                                                            >
+                                                                Deactivate
+                                                            </Button>
+                                                        )}
+                                                        {user.status !== 'suspended' && (
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-7 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                onClick={(e) => handleStatusChange(user._id, 'suspended', e)}
+                                                            >
+                                                                Suspend
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </Card>
+
+                        {/* System Health (Right Column) */}
+                        <Card className="p-6">
+                            <h3 className="text-lg font-semibold mb-4">System Health</h3>
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Server Load</span>
+                                        <span className="text-green-600">Healthy (24%)</span>
+                                    </div>
+                                    <div className="h-2 bg-gray-100 rounded-full">
+                                        <div className="h-full bg-green-500 rounded-full w-1/4" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Database Storage</span>
+                                        <span className="text-blue-600">45% Used</span>
+                                    </div>
+                                    <div className="h-2 bg-gray-100 rounded-full">
+                                        <div className="h-full bg-blue-500 rounded-full w-[45%]" />
+                                    </div>
+                                </div>
+                                <div className="pt-4 border-t mt-4">
+                                    <h4 className="text-sm font-medium mb-3">Recent Security Alerts</h4>
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2 text-xs text-muted-foreground items-start">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-1 flex-shrink-0" />
+                                            <span>Multiple failed login attempts detected from IP: 192.168.X.X</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </>
+            )}
+
+            {activeTab === 'products' && (
+                <div className="grid gap-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h2 className="text-2xl font-bold">Product Management</h2>
+                        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                            {/* Category Filter */}
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                <SelectTrigger className="w-[140px] h-9">
+                                    <SelectValue placeholder="Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Categories</SelectItem>
+                                    <SelectItem value="Seeds">Seeds</SelectItem>
+                                    <SelectItem value="Fertilizers">Fertilizers</SelectItem>
+                                    <SelectItem value="Pesticides">Pesticides</SelectItem>
+                                    <SelectItem value="Rentals">Rentals</SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            {/* Stock Filter */}
+                            <Select value={stockFilter} onValueChange={setStockFilter}>
+                                <SelectTrigger className="w-[140px] h-9">
+                                    <SelectValue placeholder="Stock Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="In Stock">In Stock</SelectItem>
+                                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <Card className="p-0 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-50/50">
+                                    <tr className="border-b text-left">
+                                        <th className="py-4 px-6 font-medium text-muted-foreground">Product</th>
+                                        <th className="py-4 px-6 font-medium text-muted-foreground">Category</th>
+                                        <th className="py-4 px-6 font-medium text-muted-foreground">Price</th>
+                                        <th className="py-4 px-6 font-medium text-muted-foreground">Seller</th>
+                                        <th className="py-4 px-6 font-medium text-muted-foreground">Status</th>
+                                        <th className="py-4 px-6 font-medium text-muted-foreground text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {filteredProducts.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="py-12 text-center text-muted-foreground">
+                                                No products found matching filters
+                                            </td>
+                                        </tr>
+                                    ) : filteredProducts.map((product) => (
+                                        <tr
+                                            key={product._id}
+                                            className="group hover:bg-gray-50/50 transition-colors cursor-pointer"
+                                            onClick={() => setSelectedProduct(product)}
+                                        >
+                                            <td className="py-4 px-6">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                        {product.image ? (
+                                                            <img src={product.image} alt="" className="w-full h-full object-cover rounded-lg" />
+                                                        ) : (
+                                                            <Package className="w-5 h-5 text-gray-400" />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-sm">{product.name}</p>
+                                                        <p className="text-xs text-muted-foreground line-clamp-1">{product.description}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="py-4 px-6">
+                                                <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                                                    {product.category}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 font-medium text-sm">
+                                                ₹{product.price} {product.unit && <span className="text-xs text-muted-foreground font-normal">/{product.unit}</span>}
+                                            </td>
+                                            <td className="py-4 px-6 text-sm text-gray-600">
+                                                {product.seller}
+                                            </td>
+                                            <td className="py-4 px-6">
+                                                <span className={`px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wide ${product.stock === 'Out of Stock' ? 'bg-red-100 text-red-600' :
+                                                    product.stock === 'Low Stock' ? 'bg-orange-100 text-orange-600' :
+                                                        'bg-green-100 text-green-600'
+                                                    }`}>
+                                                    {product.stock}
+                                                </span>
+                                            </td>
+                                            <td className="py-4 px-6 text-right">
+                                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                                                    <MoreHorizontal className="w-4 h-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
+            )}
+
+            {activeTab === 'posts' && (
+                <div className="grid gap-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-2xl font-bold">Community Posts</h2>
+                        <Select value={dateFilter} onValueChange={setDateFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by Date" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Time</SelectItem>
+                                <SelectItem value="24h">Last 24 Hours</SelectItem>
+                                <SelectItem value="week">Last 7 Days</SelectItem>
+                                <SelectItem value="month">Last 30 Days</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredPosts.length === 0 ? (
+                            <p className="col-span-3 text-center py-10 text-muted-foreground">No posts found matching filter</p>
+                        ) : filteredPosts.map((post) => (
+                            <Card key={post._id} className="cursor-pointer hover:shadow-md transition-shadow">
+                                {post.image && (
+                                    <div className="h-40 w-full overflow-hidden rounded-t-lg">
+                                        <img src={post.image} alt="Post content" className="w-full h-full object-cover transition-transform hover:scale-105" />
+                                    </div>
+                                )}
+                                <div className="p-6 flex flex-col gap-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary overflow-hidden">
+                                                <span className="text-sm">{post.author.charAt(0)}</span>
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-sm">{post.author}</h4>
+                                                <p className="text-xs text-muted-foreground">{post.date}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`text-[10px] px-2 py-0.5 rounded-full capitalize border ${post.authorRole === 'expert' ? 'bg-purple-50 text-purple-700 border-purple-100' : 'bg-gray-50 text-gray-600 border-gray-100'
+                                            }`}>
+                                            {post.authorRole}
+                                        </span>
+                                    </div>
+
+                                    <p className="text-sm text-gray-700 leading-relaxed min-h-[60px]">
+                                        {post.content}
+                                    </p>
+
+                                    <div className="flex items-center justify-between pt-4 border-t mt-auto">
+                                        <div className="flex gap-4 text-muted-foreground text-xs">
+                                            <span className="flex items-center gap-1">
+                                                {/* Replaced Icon Name with hardcoded placeholders if needed, but assuming imports exist */}
+                                                <span>❤️</span> {post.likes}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <span>💬</span> {post.comments}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            className="h-7 text-xs"
+                                            onClick={() => handleDeletePost(post._id)}
+                                        >
+                                            Delete Post
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {activeTab === 'requests' && (
+                /* Requests Tab Content */
+                <div className="grid gap-6">
+                    <h2 className="text-2xl font-bold">Pending Seller Requests</h2>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {requests.length === 0 && <p className="text-muted-foreground col-span-3 text-center py-10">No pending requests</p>}
+
+                        {requests.map((request) => (
+                            <Card key={request._id} className="p-6 flex flex-col">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 className="font-bold text-lg">{request.user}</h3>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${request.type === 'shopkeeper' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                                                {request.type}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground">{request.date}</span>
+                                        </div>
+                                    </div>
+                                    <div className={`px-2 py-1 rounded text-xs font-semibold capitalize ${request.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                        request.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                            'bg-yellow-100 text-yellow-700'
+                                        }`}>
+                                        {request.status}
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-50 p-3 rounded-md mb-4 text-sm space-y-2 flex-grow">
+                                    <p><span className="font-semibold">Details:</span> {request.details}</p>
+                                    <div className="flex items-center gap-2 text-blue-600 cursor-pointer hover:underline">
+                                        <FileText className="w-4 h-4" /> View ID Proof / Document
+                                    </div>
+                                </div>
+
+                                {request.status === 'pending' && (
+                                    <div className="flex gap-3 pt-2">
+                                        <Button
+                                            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                                            onClick={() => handleRequestAction(request._id, 'approved')}
+                                        >
+                                            Approve
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                            onClick={() => handleRequestAction(request._id, 'rejected')}
+                                        >
+                                            Reject
+                                        </Button>
+                                    </div>
+                                )}
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* User Details Modal */}
+            <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>User Details</DialogTitle>
+                        <DialogDescription>
+                            Detailed information for {selectedUser?.name}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {selectedUser && (
+                        <div className="space-y-6">
+                            {/* Header Info */}
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-xl font-bold text-primary overflow-hidden">
+                                    {selectedUser.image ? (
+                                        <img src={selectedUser.image} alt={selectedUser.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        selectedUser.name.charAt(0)
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-semibold">{selectedUser.name}</h3>
+                                    <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                                    <div className="flex gap-2 mt-2">
+                                        <span className="bg-gray-100 text-xs px-2 py-0.5 rounded capitalize">{selectedUser.role}</span>
+                                        {selectedUser.isVerifiedSeller && <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded">Verified Seller</span>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Contact Info */}
+                            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-3">
+                                    <Phone className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm">{selectedUser.phone || 'No phone provided'}</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <MapPin className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm">{selectedUser.address || 'No address provided'}</span>
+                                </div>
+                            </div>
+
+                            {/* Seller Specific Info */}
+                            {selectedUser.isVerifiedSeller && (
+                                <div className="border-t pt-4">
+                                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                        {selectedUser.sellerType === 'shopkeeper' ? <Store className="w-4 h-4" /> : <Tractor className="w-4 h-4" />}
+                                        {selectedUser.sellerType === 'shopkeeper' ? 'Shop Details' : 'Farm Details'}
+                                    </h4>
+
+                                    {selectedUser.sellerType === 'shopkeeper' ? (
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <span className="text-muted-foreground block text-xs">Shop Name</span>
+                                                <span className="font-medium">{selectedUser.shopName}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted-foreground block text-xs">GST/License</span>
+                                                <span className="font-medium">{selectedUser.gst}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <span className="text-muted-foreground block text-xs">Land Size</span>
+                                                <span className="font-medium">{selectedUser.landSize}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-muted-foreground block text-xs">Crops</span>
+                                                <span className="font-medium">{selectedUser.crops}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex justify-end pt-2">
+                                <Button variant="outline" onClick={() => setSelectedUser(null)}>Close</Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Product Details Modal */}
+            <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Product Details</DialogTitle>
+                    </DialogHeader>
+                    {selectedProduct && (
+                        <div className="space-y-6">
+                            <div className="flex items-start gap-4">
+                                <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    {selectedProduct.image ? (
+                                        <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover rounded-lg" />
+                                    ) : (
+                                        <Package className="w-10 h-10 text-gray-400" />
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold">{selectedProduct.name}</h3>
+                                    <p className="text-green-600 font-semibold text-lg flex items-center gap-1">
+                                        <IndianRupee className="w-4 h-4" />
+                                        {selectedProduct.price}
+                                        {selectedProduct.unit && <span className="text-sm text-gray-500 font-normal">/{selectedProduct.unit}</span>}
+                                    </p>
+                                    <span className="inline-block mt-2 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md font-medium">
+                                        {selectedProduct.category}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Seller</span>
+                                    <span className="font-medium">{selectedProduct.seller}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Stock Status</span>
+                                    <span className={`font-medium ${selectedProduct.stock === 'Out of Stock' ? 'text-red-600' :
+                                        selectedProduct.stock === 'Low Stock' ? 'text-orange-600' : 'text-green-600'
+                                        }`}>{selectedProduct.stock}</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="font-semibold mb-2">Description</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    {selectedProduct.description}
+                                </p>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2">
+                                <Button variant="outline" onClick={() => setSelectedProduct(null)}>Close</Button>
+                                <Button variant="destructive">Remove Listing</Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+};
+
+export default AdminView;
