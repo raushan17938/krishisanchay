@@ -307,7 +307,7 @@ export const logout = (req, res) => {
 export const googleAuth = (req, res) => {
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
-        redirect_uri: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/google/callback`,
+        redirect_uri: `${(process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`).replace(/\/$/, "")}/api/auth/google/callback`,
         client_id: process.env.GOOGLE_CLIENT_ID,
         access_type: 'offline',
         response_type: 'code',
