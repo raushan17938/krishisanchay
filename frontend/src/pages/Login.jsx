@@ -22,14 +22,12 @@ const Login = () => {
 
         if (token) {
             localStorage.setItem("token", token);
-            // Fetch user info to store in localStorage as well
-            fetch('http://localhost:5001/api/auth/me', {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(data => {
+            // Fetch user info using existing API function
+            getMe()
+                .then(res => {
+                    const data = res.data; // Axios response structure
                     if (data.success) {
-                        localStorage.setItem("userInfo", JSON.stringify(data.data));
+                        localStorage.setItem("userInfo", JSON.stringify(data.data)); // endpoint returns { success: true, data: user }
                         toast.success("Login Successful", {
                             description: "Welcome back!"
                         });
@@ -96,7 +94,8 @@ const Login = () => {
     };
 
     const handleSocialLogin = (provider) => {
-        window.location.href = `http://localhost:5001/api/auth/${provider}`;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        window.location.href = `${apiUrl}/auth/${provider}`;
     };
 
     return (

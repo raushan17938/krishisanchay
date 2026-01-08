@@ -307,7 +307,7 @@ export const logout = (req, res) => {
 export const googleAuth = (req, res) => {
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
-        redirect_uri: `http://localhost:${process.env.PORT || 5001}/api/auth/google/callback`,
+        redirect_uri: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/google/callback`,
         client_id: process.env.GOOGLE_CLIENT_ID,
         access_type: 'offline',
         response_type: 'code',
@@ -347,11 +347,13 @@ export const googleCallback = async (req, res) => {
         const token = generateToken(user._id);
 
         // Redirect to frontend with token
-        res.redirect(`http://localhost:5173/login?token=${token}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/login?token=${token}`);
 
     } catch (error) {
         console.error('Google Auth Error:', error);
-        res.redirect(`http://localhost:5173/login?error=Google_Auth_Failed`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/login?error=Google_Auth_Failed`);
     }
 };
 
@@ -362,7 +364,7 @@ export const githubAuth = (req, res) => {
     const rootUrl = 'https://github.com/login/oauth/authorize';
     const options = {
         client_id: process.env.GITHUB_CLIENT_ID,
-        redirect_uri: `http://localhost:${process.env.PORT || 5001}/api/auth/github/callback`,
+        redirect_uri: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/github/callback`,
         scope: 'user:email',
     };
 
@@ -411,11 +413,13 @@ export const githubCallback = async (req, res) => {
 
         const token = generateToken(user._id);
 
-        res.redirect(`http://localhost:5173/login?token=${token}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/login?token=${token}`);
 
     } catch (error) {
         console.error('GitHub Auth Error:', error);
-        res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(error.message)}`);
     }
 };
 
@@ -426,7 +430,7 @@ async function getGoogleOAuthTokens({ code }) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `http://localhost:${process.env.PORT || 5001}/api/auth/google/callback`,
+        redirect_uri: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/google/callback`,
         grant_type: 'authorization_code',
     };
 

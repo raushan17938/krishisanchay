@@ -62,7 +62,8 @@ const Signup = () => {
     };
 
     const handleSocialLogin = (provider) => {
-        window.location.href = `http://localhost:5001/api/auth/${provider}`;
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+        window.location.href = `${apiUrl}/auth/${provider}`;
     };
 
     return (
