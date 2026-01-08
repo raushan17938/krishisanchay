@@ -22,22 +22,8 @@ const Login = () => {
 
         if (token) {
             localStorage.setItem("token", token);
-            // Fetch user info using existing API function
-            getMe()
-                .then(res => {
-                    const data = res.data; // Axios response structure
-                    if (data.success) {
-                        localStorage.setItem("userInfo", JSON.stringify(data.data)); // endpoint returns { success: true, data: user }
-                        toast.success("Login Successful", {
-                            description: "Welcome back!"
-                        });
-                        navigate("/");
-                    }
-                })
-                .catch(err => {
-                    console.error("Failed to fetch user info", err);
-                    toast.error("Login Failed", { description: "Could not retrieve user info" });
-                });
+            // Force reload to home page to ensure clean state and axios interceptor pickup
+            window.location.href = "/";
         }
 
         if (error) {
