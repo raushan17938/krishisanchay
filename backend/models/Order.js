@@ -36,6 +36,11 @@ const orderSchema = mongoose.Schema(
             update_time: { type: String },
             email_address: { type: String },
         },
+        stripeSessionId: {
+            type: String,
+            unique: true, // Good practice to ensure it's unique
+            sparse: true // Allows nulls for non-stripe orders
+        },
         taxPrice: {
             type: Number,
             required: true,
@@ -55,6 +60,12 @@ const orderSchema = mongoose.Schema(
             type: Boolean,
             required: true,
             default: false,
+        },
+        orderStatus: {
+            type: String,
+            required: true,
+            default: 'Pending',
+            enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled']
         },
         paidAt: {
             type: Date,

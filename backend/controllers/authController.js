@@ -4,6 +4,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
 import User from '../models/User.js';
 import EmailService from '../services/EmailService.js';
+import { FRONTEND_URL, BACKEND_URL } from '../utils/urlConfig.js';
 
 // Configure Cloudinary
 cloudinary.config({
@@ -165,6 +166,14 @@ export const login = async (req, res) => {
             });
         }
 
+        // Check if account is active
+        if (user.status && user.status !== 'active') {
+            return res.status(403).json({
+                success: false,
+                message: `Your account is ${user.status}. Please contact support.`
+            });
+        }
+
         // Check if user has a password (if not, they probably used social login)
         if (!user.password) {
             return res.status(400).json({
@@ -307,7 +316,7 @@ export const logout = (req, res) => {
 export const googleAuth = (req, res) => {
     const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
     const options = {
-        redirect_uri: `${(process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`).trim().replace(/\/$/, "")}/api/auth/google/callback`,
+        redirect_uri: `${BACKEND_URL}/api/auth/google/callback`,
         client_id: process.env.GOOGLE_CLIENT_ID,
         access_type: 'offline',
         response_type: 'code',
@@ -344,16 +353,19 @@ export const googleCallback = async (req, res) => {
             providerId: googleUser.id
         });
 
+        if (user.status && user.status !== 'active') {
+            return res.redirect(`${FRONTEND_URL}/login?error=Account_Suspended`);
+        }
+
         const token = generateToken(user._id);
 
         // Redirect to frontend with token
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/login?token=${token}`);
+        // Redirect to frontend with token
+        res.redirect(`${FRONTEND_URL}/login?token=${token}`);
 
     } catch (error) {
         console.error('Google Auth Error:', error);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/login?error=Google_Auth_Failed`);
+        res.redirect(`${FRONTEND_URL}/login?error=Google_Auth_Failed`);
     }
 };
 
@@ -364,7 +376,7 @@ export const githubAuth = (req, res) => {
     const rootUrl = 'https://github.com/login/oauth/authorize';
     const options = {
         client_id: process.env.GITHUB_CLIENT_ID,
-        redirect_uri: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/github/callback`,
+        redirect_uri: `${BACKEND_URL}/api/auth/github/callback`,
         scope: 'user:email',
     };
 
@@ -411,15 +423,17 @@ export const githubCallback = async (req, res) => {
             providerId: githubUser.id.toString()
         });
 
+        if (user.status && user.status !== 'active') {
+            return res.redirect(`${FRONTEND_URL}/login?error=Account_Suspended`);
+        }
+
         const token = generateToken(user._id);
 
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/login?token=${token}`);
+        res.redirect(`${FRONTEND_URL}/login?token=${token}`);
 
     } catch (error) {
         console.error('GitHub Auth Error:', error);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(error.message)}`);
+        res.redirect(`${FRONTEND_URL}/login?error=${encodeURIComponent(error.message)}`);
     }
 };
 
@@ -430,7 +444,7 @@ async function getGoogleOAuthTokens({ code }) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`}/api/auth/google/callback`,
+        redirect_uri: `${BACKEND_URL}/api/auth/google/callback`,
         grant_type: 'authorization_code',
     };
 
@@ -740,5 +754,60 @@ export const resetPassword = async (req, res) => {
 
     } catch (error) {
         res.status(400).json({ success: false, message: 'Invalid or expired token' });
+    }
+};
+
+// @desc    Toggle Wishlist Item
+// @route   PUT /api/auth/wishlist/:productId
+// @access  Private
+export const toggleWishlist = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const index = user.wishlist.indexOf(productId);
+        let message = '';
+
+        if (index === -1) {
+            user.wishlist.push(productId);
+            message = 'Product added to wishlist';
+        } else {
+            user.wishlist.splice(index, 1);
+            message = 'Product removed from wishlist';
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message,
+            wishlist: user.wishlist
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// @desc    Get Wishlist Items
+// @route   GET /api/auth/wishlist
+// @access  Private
+export const getWishlist = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).populate('wishlist');
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user.wishlist
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 };

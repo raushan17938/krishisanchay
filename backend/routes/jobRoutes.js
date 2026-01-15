@@ -4,7 +4,9 @@ import {
     getJobs,
     getJob,
     applyJob,
-    getMyJobs
+    getMyJobs,
+    updateApplicationStatus,
+    getAppliedJobs
 } from '../controllers/jobController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -15,10 +17,13 @@ router.route('/')
     .post(protect, createJob);
 
 router.get('/my-jobs', protect, getMyJobs);
+router.get('/applied-jobs', protect, getAppliedJobs);
 
 router.route('/:id')
     .get(getJob);
 
 router.post('/:id/apply', protect, applyJob);
+
+router.put('/:id/applications/:userId', protect, updateApplicationStatus);
 
 export default router;

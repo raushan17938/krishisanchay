@@ -1,8 +1,43 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, Package, Star } from "lucide-react";
+import { ShoppingBag, Package, Star, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getMyOrders } from "../../api/order";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
-const BuyerView = ({ stats }) => {
+const BuyerView = () => {
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await getMyOrders();
+                if (response.success) {
+                    setOrders(response.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch orders", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, []);
+
+    // Calculate stats
+    const activeOrders = orders.filter(o => !o.isDelivered && o.orderStatus !== 'Cancelled').length;
+    const totalOrders = orders.length;
+    // Mock wishlist count for now as we don't have that API yet
+    const wishlistCount = 5;
+
+    if (loading) {
+        return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" /></div>;
+    }
+
     return (
         <div className="space-y-6">
             {/* Overview Stats */}
@@ -14,7 +49,7 @@ const BuyerView = ({ stats }) => {
                         </div>
                         <div>
                             <p className="text-sm text-green-800 font-medium">Active Orders</p>
-                            <h3 className="text-2xl font-bold text-green-900">{stats?.activeOrders || 2}</h3>
+                            <h3 className="text-2xl font-bold text-green-900">{activeOrders}</h3>
                         </div>
                     </div>
                 </Card>
@@ -25,8 +60,8 @@ const BuyerView = ({ stats }) => {
                             <Package className="w-6 h-6 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-sm text-blue-800 font-medium">Total Clean Purchases</p>
-                            <h3 className="text-2xl font-bold text-blue-900">{stats?.totalOrders || 12}</h3>
+                            <p className="text-sm text-blue-800 font-medium">Total Orders</p>
+                            <h3 className="text-2xl font-bold text-blue-900">{totalOrders}</h3>
                         </div>
                     </div>
                 </Card>
@@ -38,7 +73,7 @@ const BuyerView = ({ stats }) => {
                         </div>
                         <div>
                             <p className="text-sm text-orange-800 font-medium">Wishlist Items</p>
-                            <h3 className="text-2xl font-bold text-orange-900">{stats?.savedProducts || 5}</h3>
+                            <h3 className="text-2xl font-bold text-orange-900">{wishlistCount}</h3>
                         </div>
                     </div>
                 </Card>
@@ -48,38 +83,42 @@ const BuyerView = ({ stats }) => {
                 {/* Recent Orders */}
                 <div className="lg:col-span-2 space-y-6">
                     <h3 className="text-xl font-semibold">Recent Orders</h3>
-                    {[1, 2].map((i) => (
-                        <Card key={i} className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                            <div className="flex gap-4">
-                                <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0" />
-                                <div>
-                                    <h4 className="font-semibold">Organic Wheat (50kg)</h4>
-                                    <p className="text-sm text-muted-foreground">Order #2458{i} • Delivered</p>
-                                    <p className="text-primary font-medium mt-1">₹2,400</p>
+                    {orders.length === 0 ? (
+                        <p className="text-muted-foreground">No orders found.</p>
+                    ) : (
+                        orders.slice(0, 5).map((order) => (
+                            <Card key={order._id} className="p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between hover:shadow-md transition-shadow">
+                                <div className="flex gap-4 items-center">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-md flex items-center justify-center flex-shrink-0">
+                                        <Package className="text-gray-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold">Order #{order._id.slice(-6).toUpperCase()}</h4>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Badge variant={order.isDelivered ? "default" : "secondary"}>
+                                                {order.orderStatus || (order.isDelivered ? 'Delivered' : 'Processing')}
+                                            </Badge>
+                                            <span className="text-sm text-muted-foreground">
+                                                {new Date(order.createdAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm font-medium mt-1">₹{order.totalPrice}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <Button variant="outline" size="sm">Track Order</Button>
-                        </Card>
-                    ))}
+                                <Button variant="outline" size="sm" onClick={() => navigate(`/order/${order._id}`)}>
+                                    View Details
+                                </Button>
+                            </Card>
+                        ))
+                    )}
                 </div>
 
                 {/* Recommended */}
                 <div className="space-y-6">
                     <h3 className="text-xl font-semibold">Recommended for You</h3>
                     <Card className="p-4">
-                        <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex gap-3 items-center border-b last:border-0 pb-3 last:pb-0">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-md" />
-                                    <div className="flex-1">
-                                        <h5 className="font-medium text-sm">Fresh Tomatoes</h5>
-                                        <p className="text-xs text-muted-foreground">₹40/kg</p>
-                                    </div>
-                                    <Button size="icon" variant="ghost" className="h-8 w-8">
-                                        <ShoppingBag className="w-4 h-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                        <div className="text-center py-4 text-muted-foreground text-sm">
+                            Recommendations coming soon...
                         </div>
                     </Card>
                 </div>

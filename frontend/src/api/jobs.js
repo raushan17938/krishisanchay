@@ -21,3 +21,11 @@ export const applyJob = (id) => {
 export const getMyJobs = () => {
     return axios.get('/jobs/my-jobs');
 };
+
+export const getAppliedJobs = () => {
+    return axios.get('/jobs/applied-jobs');
+};
+
+export const updateApplicationStatus = (jobId, userId, status) => {
+    return axios.put(`/jobs/${jobId}/applications/${userId}`, { status });
+};

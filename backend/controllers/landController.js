@@ -148,23 +148,110 @@ export const getLandRequests = async (req, res) => {
     }
 }
 
+// @desc    Get my sent land applications
+// @route   GET /api/land/my-applications
+// @access  Private
+export const getMyLandApplications = async (req, res) => {
+    try {
+        const applications = await LandRequest.find({ user: req.user._id })
+            .populate('land', 'title location image price')
+            .populate('owner', 'name email phone mobile');
+
+        res.json({ success: true, count: applications.length, data: applications });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+// @desc    Get ALL land requests (Admin view)
+// @route   GET /api/land/admin/requests
+// @access  Private (Admin)
+export const getAllAllLandRequests = async (req, res) => {
+    try {
+        const requests = await LandRequest.find({})
+            .populate('user', 'name email')
+            .populate('owner', 'name email')
+            .populate('land', 'title location');
+
+        res.json({ success: true, count: requests.length, data: requests });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 // @desc    Update request status (Approve/Reject)
 // @route   PUT /api/land/requests/:id
 // @access  Private
 export const updateRequestStatus = async (req, res) => {
     try {
-        const request = await LandRequest.findById(req.params.id);
+        const { status } = req.body;
+        const request = await LandRequest.findById(req.params.id)
+            .populate('user', 'name email')
+            .populate('owner', 'name phone mobile')
+            .populate('land', 'title');
 
         if (!request) {
             return res.status(404).json({ success: false, message: 'Request not found' });
         }
 
-        if (request.owner.toString() !== req.user.id) {
+        if (request.owner._id.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(401).json({ success: false, message: 'Not authorized' });
         }
 
-        request.status = req.body.status;
+        request.status = status;
         await request.save();
+
+        const year = new Date().getFullYear();
+
+        // Enforce Single Approval Logic
+        if (status === 'approved') {
+            // 1. Reject all other PENDING requests for this SAME land
+            await LandRequest.updateMany(
+                {
+                    land: request.land._id,
+                    _id: { $ne: request._id }, // Not this request
+                    status: 'pending'
+                },
+                {
+                    status: 'rejected'
+                }
+            );
+
+            // Send Approval Email
+            try {
+                await EmailService.sendEmail(
+                    request.user.email,
+                    'Land Request Approved',
+                    'request_approved',
+                    {
+                        name: request.user.name,
+                        landTitle: request.land.title,
+                        ownerName: request.owner.name,
+                        ownerPhone: request.owner.phone || request.owner.mobile || 'N/A',
+                        year
+                    }
+                );
+            } catch (emailError) {
+                console.error('Failed to send approval email:', emailError);
+            }
+
+        } else if (status === 'rejected') {
+            // Send Rejection Email
+            try {
+                await EmailService.sendEmail(
+                    request.user.email,
+                    'Land Request Update',
+                    'request_rejected',
+                    {
+                        name: request.user.name,
+                        landTitle: request.land.title,
+                        year
+                    }
+                );
+            } catch (emailError) {
+                console.error('Failed to send rejection email:', emailError);
+            }
+        }
 
         res.json({ success: true, data: request });
     } catch (error) {

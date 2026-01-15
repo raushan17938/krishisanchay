@@ -10,7 +10,11 @@ import {
   ArrowRight,
   CheckCircle,
   Zap,
-  Award
+  Award,
+  MessageCircle,
+  Camera,
+  Briefcase,
+  ShoppingCart
 } from "lucide-react";
 import heroFarm from "@/assets/hero-farm.jpg";
 import digitalFarming from "@/assets/digital-farming.jpg";
@@ -124,64 +128,106 @@ const Hero = ({ onNavigate }) => {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-12 sm:mb-16 lg:mb-20">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16 lg:mb-20">
+          {/* Feature 1: AI Advisor */}
           <Card
             onClick={() => onNavigate && onNavigate('ai-advisor')}
-            className="farm-card text-center group hover:-translate-y-4 animate-slide-up cursor-pointer">
-            <div className="bg-gradient-primary w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+            className="farm-card text-center group hover:-translate-y-4 animate-slide-up cursor-pointer p-6">
+            <div className="bg-gradient-primary w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-green-200">
+              <MessageCircle size={40} strokeWidth={2} color="white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">AI Kisan Advisor</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Your personal farming expert. Ask questions in your language and get instant advice.
+            </p>
+            <div className="flex justify-center text-primary font-medium group-hover:gap-2 transition-all items-center">
+              <span>Ask Now</span>
+              <ArrowRight size={18} className="ml-1" />
+            </div>
+          </Card>
+
+          {/* Feature 2: Crop Doctor */}
+          <Card
+            onClick={() => onNavigate && onNavigate('crop-doctor')}
+            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:100ms] cursor-pointer p-6">
+            <div className="bg-gradient-earth w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-orange-200">
+              <Camera size={40} strokeWidth={2} color="white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">Crop Doctor</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Take a photo of your sick crop and get instant diagnosis and treatment solutions.
+            </p>
+            <div className="flex justify-center text-orange-600 font-medium group-hover:gap-2 transition-all items-center">
+              <span>Diagnose</span>
+              <ArrowRight size={18} className="ml-1" />
+            </div>
+          </Card>
+
+          {/* Feature 3: Job Portal */}
+          <Card
+            onClick={() => onNavigate && onNavigate('jobs-listing')}
+            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:200ms] cursor-pointer p-6">
+            <div className="bg-gradient-sky w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-blue-200">
+              <Briefcase size={40} strokeWidth={2} color="white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">Krishi Jobs</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Find agricultural work or hire skilled labor for your farm. Connect locally.
+            </p>
+            <div className="flex justify-center text-blue-600 font-medium group-hover:gap-2 transition-all items-center">
+              <span>Find Work</span>
+              <ArrowRight size={18} className="ml-1" />
+            </div>
+          </Card>
+
+          {/* Feature 4: Land Rental */}
+          <Card
+            onClick={() => onNavigate && onNavigate('land-rental')}
+            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:300ms] cursor-pointer p-6">
+            <div className="bg-gradient-harvest w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-yellow-200">
               <Leaf size={40} strokeWidth={2} color="white" />
             </div>
-            <h3 className="text-2xl font-bold mb-4">Smart Farming</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              AI and Machine Learning for crop advice and disease detection
+            <h3 className="text-2xl font-bold mb-3">Land Exchange</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Lease land or rent equipment securely. Expand your farming capacity.
             </p>
-            <div className="mt-6 flex justify-center">
-              <ArrowRight size={20} strokeWidth={2} color="currentColor" className="group-hover:translate-x-1 transition-transform" />
+            <div className="flex justify-center text-yellow-600 font-medium group-hover:gap-2 transition-all items-center">
+              <span>Explore Land</span>
+              <ArrowRight size={18} className="ml-1" />
             </div>
           </Card>
 
-          <Card
-            onClick={() => onNavigate && onNavigate('dashboard')}
-            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:200ms] cursor-pointer">
-            <div className="bg-gradient-sky w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-              <TrendingUp size={40} strokeWidth={2} color="white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4">Market Prices</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Live market prices and weather information
-            </p>
-            <div className="mt-6 flex justify-center">
-              <ArrowRight size={20} strokeWidth={2} color="currentColor" className="group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Card>
-
-          <Card
-            onClick={() => onNavigate && onNavigate('community')}
-            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:400ms] cursor-pointer">
-            <div className="bg-gradient-earth w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-              <Users size={40} strokeWidth={2} color="white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4">Farmer Community</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Share experiences and ask questions
-            </p>
-            <div className="mt-6 flex justify-center">
-              <ArrowRight size={20} strokeWidth={2} color="currentColor" className="group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Card>
-
+          {/* Feature 5: Marketplace */}
           <Card
             onClick={() => onNavigate && onNavigate('shop')}
-            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:600ms] cursor-pointer">
-            <div className="bg-gradient-harvest w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-              <Shield size={40} strokeWidth={2} color="currentColor" />
+            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:400ms] cursor-pointer p-6">
+            <div className="bg-gradient-to-br from-purple-500 to-indigo-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-purple-200">
+              <ShoppingCart size={40} strokeWidth={2} color="white" />
             </div>
-            <h3 className="text-2xl font-bold mb-4">Secure Trading</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Trusted buying-selling and land leasing
+            <h3 className="text-2xl font-bold mb-3">Marketplace</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Buy seeds, fertilizers, and tools. Sell your harvest directly to buyers.
             </p>
-            <div className="mt-6 flex justify-center">
-              <ArrowRight size={20} strokeWidth={2} color="currentColor" className="group-hover:translate-x-1 transition-transform" />
+            <div className="flex justify-center text-purple-600 font-medium group-hover:gap-2 transition-all items-center">
+              <span>Shop Now</span>
+              <ArrowRight size={18} className="ml-1" />
+            </div>
+          </Card>
+
+          {/* Feature 6: Community */}
+          <Card
+            onClick={() => onNavigate && onNavigate('community')}
+            className="farm-card text-center group hover:-translate-y-4 animate-slide-up [animation-delay:500ms] cursor-pointer p-6">
+            <div className="bg-gradient-to-br from-pink-500 to-rose-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-pink-200">
+              <Users size={40} strokeWidth={2} color="white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-3">Farmer Community</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              Join the discussion. Share tips, ask advice, and connect with 50K+ farmers.
+            </p>
+            <div className="flex justify-center text-rose-600 font-medium group-hover:gap-2 transition-all items-center">
+              <span>Join Discussion</span>
+              <ArrowRight size={18} className="ml-1" />
             </div>
           </Card>
         </div>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerUser } from "../api/auth";
+import { API_URL } from "../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,8 +63,7 @@ const Signup = () => {
     };
 
     const handleSocialLogin = (provider) => {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        window.location.href = `${apiUrl}/auth/${provider}`;
+        window.location.href = `${API_URL}/auth/${provider}`;
     };
 
     return (

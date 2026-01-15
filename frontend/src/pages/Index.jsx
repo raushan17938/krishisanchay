@@ -14,15 +14,34 @@ import ProductManagement from "./ProductManagement";
 import JobsListing from "./JobsListing";
 import JobDetails from "./JobDetails";
 import PostJob from "./PostJob";
+import FarmerOrders from "./FarmerOrders";
+import DeliveryJobs from "./DeliveryJobs";
+import LandOwnerRequests from "@/components/LandOwnerRequests";
+import MyLandApplications from "@/components/MyLandApplications";
+import JobApplicants from "./JobApplicants"; // Added import
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState("hero");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [currentView, setCurrentView] = useState(searchParams.get("view") || "hero");
   const [selectedFarmerId, setSelectedFarmerId] = useState(null);
   const [selectedJobId, setSelectedJobId] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation(); // Import useLocation
+
+  // Sync state changes to URL
+  useEffect(() => {
+    setSearchParams({ view: currentView });
+  }, [currentView, setSearchParams]);
+
+  // Handle incoming navigation state
+  useEffect(() => {
+    if (location.state?.view) {
+      setCurrentView(location.state.view);
+    }
+  }, [location.state]);
 
   // Define protected views that require authentication
   const protectedViews = [
@@ -30,7 +49,21 @@ const Index = () => {
     "farmer-profile",
     "land-management",
     "product-management",
-    "post-job"
+    "post-job",
+    "land-rental",
+    "farmer-detail",
+    "community",
+    "shop",
+    "crop-doctor",
+    "ai-advisor",
+    "jobs-listing",
+    "job-details",
+    "farmer-orders",
+    "delivery-jobs",
+    "land-requests",
+    "land-requests",
+    "my-applications",
+    "job-applicants"
   ];
 
   // Check authentication when view changes
@@ -70,12 +103,18 @@ const Index = () => {
   const handleApplyForJob = (jobId) => {
 
   };
+
+  const handleViewApplicants = (jobId) => {
+    setSelectedJobId(jobId);
+    setCurrentView("job-applicants");
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case "hero":
         return <Hero onNavigate={setCurrentView} />;
       case "dashboard":
-        return <Dashboard onNavigate={setCurrentView} />;
+        return <Dashboard onNavigate={setCurrentView} onViewApplicants={handleViewApplicants} />;
       case "land-rental":
         return <LandRental />;
       case "farmer-detail":
@@ -97,9 +136,19 @@ const Index = () => {
       case "jobs-listing":
         return <JobsListing onBack={() => setCurrentView("dashboard")} onViewJob={handleViewJob} onPostJob={handlePostJob} />;
       case "job-details":
-        return selectedJobId ? <JobDetails jobId={selectedJobId} onBack={handleBackToJobs} onApply={handleApplyForJob} /> : <JobsListing onBack={() => setCurrentView("dashboard")} onViewJob={handleViewJob} onPostJob={handlePostJob} />;
+        return selectedJobId ? <JobDetails jobId={selectedJobId} onBack={handleBackToJobs} onApply={handleApplyForJob} onManage={handleViewApplicants} /> : <JobsListing onBack={() => setCurrentView("dashboard")} onViewJob={handleViewJob} onPostJob={handlePostJob} />;
+      case "job-applicants":
+        return selectedJobId ? <JobApplicants jobId={selectedJobId} onBack={() => setCurrentView("dashboard")} /> : <JobsListing onBack={() => setCurrentView("dashboard")} onViewJob={handleViewJob} onPostJob={handlePostJob} />;
       case "post-job":
         return <PostJob onBack={handleBackToJobs} onPreview={(jobData) => { }} />
+      case "farmer-orders":
+        return <FarmerOrders onBack={() => setCurrentView("dashboard")} />;
+      case "delivery-jobs":
+        return <DeliveryJobs onBack={() => setCurrentView("dashboard")} />;
+      case "land-requests":
+        return <LandOwnerRequests onBack={() => setCurrentView("dashboard")} />;
+      case "my-applications":
+        return <MyLandApplications onBack={() => setCurrentView("dashboard")} />;
       default:
         return <Hero />;
     }

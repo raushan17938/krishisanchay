@@ -73,3 +73,15 @@ export const updateProfile = async (userData) => {
     const response = await api.put('/auth/profile', userData, config);
     return response.data;
 };
+
+// Toggle Wishlist
+export const toggleWishlistService = async (productId) => {
+    const response = await api.put(`/auth/wishlist/${productId}`);
+    return response.data;
+};
+
+// Get Wishlist
+export const getWishlistService = async () => {
+    const response = await api.get('/auth/wishlist');
+    return response.data;
+};

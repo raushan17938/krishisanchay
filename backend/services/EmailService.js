@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import handlebars from 'handlebars';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,8 +24,9 @@ class EmailService {
                     pass: process.env.SMTP_PASS,
                 },
             });
+            console.log("✅ SMTP Transporter initialized with host:", process.env.SMTP_HOST);
         } else {
-
+            console.warn("⚠️ SMTP Config missing. Emails will NOT be sent.");
         }
     }
 
@@ -43,6 +45,7 @@ class EmailService {
                 return info;
             } else {
 
+                console.log(`[MOCK EMAIL] To: ${to}, Subject: ${subject}`);
                 return { messageId: 'fake-id' };
             }
         } catch (error) {
@@ -55,15 +58,9 @@ class EmailService {
         const templatePath = path.join(__dirname, '../templates/emails', `${templateName}.html`);
 
         try {
-            let template = await fs.promises.readFile(templatePath, 'utf8');
-
-            // Simple template engine: replace {{key}} with data[key]
-            Object.keys(data).forEach(key => {
-                const regex = new RegExp(`{{${key}}}`, 'g');
-                template = template.replace(regex, data[key]);
-            });
-
-            return template;
+            const templateSource = await fs.promises.readFile(templatePath, 'utf8');
+            const template = handlebars.compile(templateSource);
+            return template(data);
         } catch (error) {
             console.error(`Error loading template ${templateName}:`, error);
             throw new Error('Email template could not be loaded');

@@ -82,8 +82,9 @@ const Navigation = ({ currentView, setCurrentView }) => {
     localStorage.removeItem('userInfo');
     localStorage.removeItem('token');
     setUser(null);
+    setCurrentView('hero'); // Force view change to unmount protected components
+    navigate('/');
     toast.success("Logged out successfully");
-    navigate('/'); // Use navigate just in case, though we are in SPA mode
   };
 
   const navItems = [

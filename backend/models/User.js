@@ -101,6 +101,10 @@ const userSchema = mongoose.Schema(
             enum: ['farmer', 'shopkeeper', 'none'],
             default: 'none',
         },
+        wishlist: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        }],
     },
     {
         timestamps: true,

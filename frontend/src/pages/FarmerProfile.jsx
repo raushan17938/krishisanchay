@@ -9,6 +9,7 @@ import { ArrowLeft, Save, User, Briefcase, Loader2, Camera } from "lucide-react"
 import { useNavigate } from "react-router-dom"; // Added
 import { getMe, updateProfile } from "@/api/auth"; // Added
 import { toast } from "sonner"; // Added
+import LandOwnerRequests from "@/components/LandOwnerRequests"; // Added
 
 //... (component start)
 const FarmerProfile = ({ onBack }) => {
@@ -195,7 +196,7 @@ const FarmerProfile = ({ onBack }) => {
 
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
-  // ... (rest of form)
+
                 <Input
                   id="name"
                   value={formData.name}
@@ -337,6 +338,11 @@ const FarmerProfile = ({ onBack }) => {
           <Button onClick={handleSave} className="w-full sm:w-auto" disabled={saving}>
             {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Changes</>}
           </Button>
+        </div>
+
+        {/* Land Requests Section */}
+        <div className="mt-8">
+          <LandOwnerRequests />
         </div>
       </div>
     </div>

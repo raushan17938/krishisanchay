@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getMe, updateProfile, logout, googleAuth, googleCallback, githubAuth, githubCallback, setPassword, forgotPassword, verifyOtp, resetPassword, verifyEmail } from '../controllers/authController.js';
+import { register, login, getMe, updateProfile, logout, googleAuth, googleCallback, githubAuth, githubCallback, setPassword, forgotPassword, verifyOtp, resetPassword, verifyEmail, toggleWishlist, getWishlist } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -25,6 +25,8 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.put('/profile', protect, upload.single('avatar'), updateProfile); // Add profile update route
+router.put('/wishlist/:productId', protect, toggleWishlist);
+router.get('/wishlist', protect, getWishlist);
 router.get('/logout', logout);
 
 export default router;

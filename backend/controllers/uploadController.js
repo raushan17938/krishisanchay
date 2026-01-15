@@ -19,6 +19,7 @@ export const uploadImage = async (req, res) => {
                 const stream = cloudinary.uploader.upload_stream(
                     {
                         folder: 'Krishi_Sanchay',
+                        resource_type: 'auto',
                     },
                     (error, result) => {
                         if (result) {

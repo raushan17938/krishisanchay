@@ -31,18 +31,45 @@ const ProductManagement = ({ onBack }) => {
   const categories = ["Grains", "Vegetables", "Fruits", "Spices", "Dairy", "Others"];
   const units = ["per kg", "per quintal", "per piece", "per dozen", "per liter"];
 
+  // Get user info for verification check
+  const userInfo = localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')) : null;
+
+  const handleAddClick = () => {
+    if (!userInfo) {
+      toast.error("Please login to add products");
+      return;
+    }
+
+    if (!userInfo.isVerifiedSeller) {
+      toast.error("Please verify your account to add products", {
+        description: "Go to Dashboard > Sell on Krishi Sanchay to verify."
+      });
+      return;
+    }
+
+    setShowAddForm(true);
+  };
+
   // Fetch user's products
   useEffect(() => {
     const fetchUserProducts = async () => {
       try {
-        const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+        if (!userInfo) {
+          toast.error("Please login to view your products");
+          return;
+        }
+
+        // ... (rest of fetch logic using userInfo variable)
         // In a real app, backend would filter by seller, or we filter client side
         const data = await getProducts();
+
         if (data.success) {
           // Filter products owned by current user
-          const userProducts = data.data.filter(p =>
-            (typeof p.seller === 'object' ? p.seller._id : p.seller) === userInfo._id
-          ).map(p => ({
+          const userProducts = data.data.filter(p => {
+            if (!p.seller) return false;
+            const sellerId = typeof p.seller === 'object' ? p.seller._id : p.seller;
+            return sellerId === userInfo._id;
+          }).map(p => ({
             id: p._id,
             ...p,
             status: p.countInStock > 0 ? "available" : "sold",
@@ -51,79 +78,14 @@ const ProductManagement = ({ onBack }) => {
           setProducts(userProducts);
         }
       } catch (error) {
-        console.error(error);
-        toast.error("Failed to load your products");
+        console.error("Fetch products error:", error);
+        toast.error("Failed to load your products", { description: error.message });
       }
     };
     fetchUserProducts();
-  }, []);
+  }, []); // userInfo is stable as it comes from localStorage, but strictly should be in dep array or ignored. Empty array is fine for now as we want mount-only fetch.
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      category: "",
-      price: "",
-      unit: "per kg",
-      quantity: "",
-      description: "",
-      image: "/api/placeholder/150/150",
-      countInStock: 0
-    });
-    setEditingProduct(null);
-    setShowAddForm(false);
-  };
-
-  const handleAddProduct = async () => {
-    if (!formData.name || !formData.category || !formData.price || !formData.quantity) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const payload = {
-        ...formData,
-        countInStock: Number(formData.quantity)
-      };
-      const data = await createProduct(payload);
-
-      if (data.success) {
-        const newProduct = {
-          id: data.data._id,
-          ...data.data,
-          status: "available",
-          quantity: data.data.countInStock
-        };
-        setProducts(prev => [...prev, newProduct]);
-        toast.success("Product added successfully");
-        resetForm();
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Failed to add product");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditProduct = (product) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      unit: product.unit || "per kg",
-      quantity: product.quantity,
-      description: product.description,
-      image: product.image,
-      countInStock: product.quantity
-    });
-    setShowAddForm(true);
-  };
+  // ... (existing handlers) ...
 
   const handleUpdateProduct = async () => {
     if (!editingProduct) return;
@@ -199,7 +161,7 @@ const ProductManagement = ({ onBack }) => {
           </div>
         </div>
 
-        <Button onClick={() => setShowAddForm(true)} className="flex items-center gap-2">
+        <Button onClick={handleAddClick} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Add Product
         </Button>
@@ -405,7 +367,7 @@ const ProductManagement = ({ onBack }) => {
           <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No products yet</h3>
           <p className="text-muted-foreground mb-4">Start by adding your first product to the marketplace</p>
-          <Button onClick={() => setShowAddForm(true)}>
+          <Button onClick={handleAddClick}>
             <Plus className="h-4 w-4 mr-2" />
             Add Your First Product
           </Button>

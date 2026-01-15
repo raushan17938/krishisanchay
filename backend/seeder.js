@@ -24,7 +24,7 @@ const products = [
     },
     {
         name: 'NPK 19-19-19 Fertilizer',
-        image: 'https://images.unsplash.com/photo-1627920769842-832af6d31b01?auto=format&fit=crop&q=80&w=1000',
+        image: 'https://images.unsplash.com/photo-1655130944329-b3a63166f6b5?q=80&w=1933&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description: 'Balanced water-soluble fertilizer for vegetative growth. Provides Nitrogen, Phosphorus, and Potassium in equal ratio.',
         category: 'Fertilizers',
         price: 850,
@@ -34,7 +34,7 @@ const products = [
     },
     {
         name: 'Heavy Duty Tractor',
-        image: 'https://images.unsplash.com/photo-1595117326841-f703566735c3?auto=format&fit=crop&q=80&w=1000',
+        image: 'https://images.unsplash.com/photo-1594771804886-a933bb2d609b?q=80&w=1764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description: '50 HP Tractor for heavy field work. Fuel efficient and low maintenance.',
         category: 'Machinery',
         price: 650000,
@@ -44,7 +44,7 @@ const products = [
     },
     {
         name: 'Pesticide Sprayer Pump',
-        image: 'https://images.unsplash.com/photo-1622383563227-0440113a8627?auto=format&fit=crop&q=80&w=1000',
+        image: 'https://plus.unsplash.com/premium_photo-1661852187790-b44bcce911c0?q=80&w=1758&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description: '16L capacity battery operated sprayer. Comfortable back strap and high pressure nozzle.',
         category: 'Equipment',
         price: 3200,
@@ -54,7 +54,7 @@ const products = [
     },
     {
         name: 'Hybrid Tomato Seeds',
-        image: 'https://images.unsplash.com/photo-1561136594-8f906f976160?auto=format&fit=crop&q=80&w=1000',
+        image: 'https://images.unsplash.com/photo-1513791053024-3b50799fdd7b?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         description: 'Disease resistant hybrid tomato seeds. Produces firm and juicy tomatoes suitable for long transport.',
         category: 'Seeds',
         price: 450,
@@ -175,16 +175,17 @@ const jobs = [
 const posts = [
     {
         content: 'Just harvested my first batch of organic turmeric! The yield is amazing this year thanks to the new drip irrigation system. #OrganicFarming #Harvest',
-        image: 'https://images.unsplash.com/photo-1615485500704-8e99099928d3?auto=format&fit=crop&q=80&w=1000',
+        image: 'https://images.unsplash.com/photo-1666818398897-381dd5eb9139?q=80&w=1748&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         tags: ['Organic', 'Success', 'Turmeric'],
     },
     {
         content: 'Is anyone facing issues with Fall Armyworm in maize? Looking for organic control methods. Please suggest.',
+        image: 'https://images.unsplash.com/photo-1565522734001-f00e62ec8424?q=80&w=1740&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         tags: ['PestControl', 'Maize', 'Help'],
     },
     {
         content: 'Attended the Krishi Vigyan Kendra workshop today. Learned a lot about soil health management. Highly recommended for young farmers.',
-        image: 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c7c18?auto=format&fit=crop&q=80&w=1000',
+        image: 'https://images.unsplash.com/photo-1609126917056-243a15e2e789?q=80&w=1738&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         tags: ['Learning', 'SoilHealth', 'KVK'],
     }
 ];

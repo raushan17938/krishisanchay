@@ -5,8 +5,7 @@ const sellerRequestSchema = mongoose.Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            required: true,
-            unique: true // One pending request per user at a time
+            required: true
         },
         type: {
             type: String,

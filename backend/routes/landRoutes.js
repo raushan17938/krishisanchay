@@ -9,9 +9,12 @@ import {
     getLandRequests,
     updateRequestStatus,
     generateHandoverOtp,
-    verifyHandoverOtp
+    verifyHandoverOtp,
+
+    getAllAllLandRequests,
+    getMyLandApplications
 } from '../controllers/landController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, admin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -20,6 +23,8 @@ router.route('/')
     .post(protect, createLand);
 
 router.route('/requests').get(protect, getLandRequests);
+router.route('/my-applications').get(protect, getMyLandApplications);
+router.route('/admin/requests').get(protect, admin, getAllAllLandRequests);
 
 router.route('/requests/:id')
     .put(protect, updateRequestStatus);

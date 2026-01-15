@@ -10,6 +10,18 @@ export const updateUserStatus = (id, status) => {
     return axios.put(`/admin/users/${id}/status`, { status });
 };
 
-// Get Dashboard Stats (Aggregated)
-// If backend doesn't have a dedicated stats endpoint, we might have to aggregate on frontend
-// or create a new endpoint. For now, frontend aggregation is fine as we are fetching all lists.
+
+// Get Seller Requests
+export const getSellerRequests = () => {
+    return axios.get('/seller/requests');
+};
+
+// Update Request Status
+export const updateRequestStatus = (id, status, adminComments = '') => {
+    return axios.put(`/seller/requests/${id}`, { status, adminComments });
+};
+
+// Get All Land Requests (Admin)
+export const getAllLandRequests = () => {
+    return axios.get('/land/admin/requests');
+};

@@ -43,3 +43,6 @@ export const authorize = (...roles) => {
         next();
     };
 };
+
+export const admin = authorize('admin');
+

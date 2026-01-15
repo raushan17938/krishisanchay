@@ -1,18 +1,27 @@
 import { useState, useEffect } from "react";
 import { loginUser, socialLogin, getMe } from "../api/auth";
+import { API_URL } from "../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Leaf, Mail, Lock, Loader2, ArrowRight, Github } from "lucide-react";
+import { Leaf, Mail, Lock, Loader2, ArrowRight, Github, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (localStorage.getItem("token")) {
+            navigate("/");
+        }
+    }, [navigate]);
 
     // Check for token in URL (from social login redirect)
     useEffect(() => {
@@ -27,9 +36,15 @@ const Login = () => {
         }
 
         if (error) {
-            toast.error("Social Login Failed", {
-                description: error.replaceAll('_', ' ')
-            });
+            if (error === 'Account_Suspended') {
+                toast.error("Account Suspended", {
+                    description: "Your account has been suspended. Please contact support."
+                });
+            } else {
+                toast.error("Social Login Failed", {
+                    description: error.replaceAll('_', ' ')
+                });
+            }
         }
     }, [navigate]);
 
@@ -80,8 +95,7 @@ const Login = () => {
     };
 
     const handleSocialLogin = (provider) => {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
-        window.location.href = `${apiUrl}/auth/${provider}`;
+        window.location.href = `${API_URL}/auth/${provider}`;
     };
 
     return (
@@ -153,13 +167,20 @@ const Login = () => {
                                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                     <Input
                                         id="password"
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="••••••••"
-                                        className="pl-10 h-11 bg-gray-50/50 border-gray-200 focus:bg-white transition-all duration-300"
+                                        className="pl-10 pr-10 h-11 bg-gray-50/50 border-gray-200 focus:bg-white transition-all duration-300"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-3 text-muted-foreground hover:text-primary transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    </button>
                                 </div>
                             </div>
                         </div>

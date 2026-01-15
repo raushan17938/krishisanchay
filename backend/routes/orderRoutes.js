@@ -8,7 +8,11 @@ import {
     getOrders,
     generateDeliveryOtp,
     verifyDeliveryOtp,
-    createPaymentIntent
+    createCheckoutSession,
+    checkoutSuccess,
+    getFarmerOrders,
+    getAvailableDeliveryOrders,
+    updateOrderStatus
 } from '../controllers/orderController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
@@ -20,7 +24,11 @@ router.route('/')
     .get(protect, authorize('admin', 'expert'), getOrders); // Only Admin/Expert can see all orders
 
 router.route('/myorders').get(protect, getMyOrders);
-router.route('/create-payment-intent').post(protect, createPaymentIntent);
+router.route('/farmer-orders').get(protect, getFarmerOrders);
+router.route('/available-delivery').get(protect, getAvailableDeliveryOrders);
+
+router.route('/create-checkout-session').post(protect, createCheckoutSession);
+router.route('/checkout-success').post(protect, checkoutSuccess);
 
 router.route('/:id')
     .get(protect, getOrderById);
@@ -32,9 +40,14 @@ router.route('/:id/deliver')
     .put(protect, authorize('admin', 'expert'), updateOrderToDelivered);
 
 router.route('/:id/generate-otp')
-    .post(protect, authorize('admin', 'expert'), generateDeliveryOtp);
+    .post(protect, generateDeliveryOtp);
 
 router.route('/:id/verify-otp')
-    .post(protect, authorize('admin', 'expert'), verifyDeliveryOtp);
+    .post(protect, verifyDeliveryOtp);
+
+router.route('/:id/status')
+    .put(protect, updateOrderStatus);
+
+
 
 export default router;

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #FF9800;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Application Update</h2>
+        </div>
+        <div class="content">
+            <p>Dear {{name}},</p>
+            <p>Your application for <strong>{{jobTitle}}</strong> at <strong>{{company}}</strong> has been updated.</p>
+            <p><strong>New Status: {{status}}</strong></p>
+
+            {{#if isAccepted}}
+            <p>Congratulations! The recruiter will contact you shortly regarding the next steps.</p>
+            {{else}}
+            <p>Thank you for your interest. We encourage you to apply for other opportunities on our platform.</p>
+            {{/if}}
+
+            <p>Best regards,<br>Krishi Sanchay Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Krishi Sanchay. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>
