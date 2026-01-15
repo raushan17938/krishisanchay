@@ -12,7 +12,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: [FRONTEND_URL, 'http://localhost:5173'],
+  origin: [FRONTEND_URL, 'http://localhost:5173', 'https://krishisanchay.vercel.app'],
   credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));

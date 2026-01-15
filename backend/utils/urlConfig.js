@@ -1,5 +1,5 @@
 export const FRONTEND_URL = process.env.NODE_ENV === 'production'
-    ? (process.env.FRONTEND_URL || 'https://krishi-sanchay.vercel.app').replace(/\/$/, "")
+    ? (process.env.FRONTEND_URL || 'https://krishisanchay.vercel.app').replace(/\/$/, "")
     : 'http://localhost:5173';
 
 export const BACKEND_URL = (process.env.NODE_ENV === 'production'
