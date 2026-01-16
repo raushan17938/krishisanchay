@@ -27,9 +27,10 @@ class EmailService {
                 connectionTimeout: 20000, // 20 seconds
                 greetingTimeout: 20000,   // 20 seconds
                 socketTimeout: 20000,     // 20 seconds
+                family: 4 // Force IPv4 to prevent timeouts
             });
 
-            console.log("✅ SMTP Transporter initialized with host:", process.env.SMTP_HOST);
+            console.log(`✅ SMTP Transporter initialized with host: ${process.env.SMTP_HOST}, port: ${port}`);
 
             // Verify connection configuration
             this.transporter.verify((error, success) => {
