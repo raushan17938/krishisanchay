@@ -14,23 +14,24 @@ class EmailService {
     }
 
     initTransporter() {
-        if (process.env.SMTP_HOST && process.env.SMTP_USER) {
-            const port = parseInt(process.env.SMTP_PORT) || 587;
+        if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+            // Using 'service: gmail' handles host/port/secure automatically
             this.transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST,
-                port: port,
-                secure: port === 465, // true for 465, false for other ports
+                service: 'gmail',
                 auth: {
                     user: process.env.SMTP_USER,
                     pass: process.env.SMTP_PASS,
                 },
-                connectionTimeout: 20000, // 20 seconds
-                greetingTimeout: 20000,   // 20 seconds
-                socketTimeout: 20000,     // 20 seconds
-                family: 4 // Force IPv4 to prevent timeouts
+                tls: {
+                    rejectUnauthorized: false
+                },
+                family: 4, // Force IPv4
+                connectionTimeout: 20000,
+                greetingTimeout: 20000,
+                socketTimeout: 20000,
             });
 
-            console.log(`✅ SMTP Transporter initialized with host: ${process.env.SMTP_HOST}, port: ${port}`);
+            console.log(`✅ SMTP Transporter initialized for Gmail Service`);
 
             // Verify connection configuration
             this.transporter.verify((error, success) => {
