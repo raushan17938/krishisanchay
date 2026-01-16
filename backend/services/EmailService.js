@@ -15,17 +15,18 @@ class EmailService {
 
     initTransporter() {
         if (process.env.SMTP_HOST && process.env.SMTP_USER) {
+            const port = parseInt(process.env.SMTP_PORT) || 587;
             this.transporter = nodemailer.createTransport({
                 host: process.env.SMTP_HOST,
-                port: process.env.SMTP_PORT || 587,
-                secure: false, // true for 465, false for other ports
+                port: port,
+                secure: port === 465, // true for 465, false for other ports
                 auth: {
                     user: process.env.SMTP_USER,
                     pass: process.env.SMTP_PASS,
                 },
-                connectionTimeout: 10000, // 10 seconds
-                greetingTimeout: 5000,    // 5 seconds
-                socketTimeout: 10000,     // 10 seconds
+                connectionTimeout: 20000, // 20 seconds
+                greetingTimeout: 20000,   // 20 seconds
+                socketTimeout: 20000,     // 20 seconds
             });
 
             console.log("✅ SMTP Transporter initialized with host:", process.env.SMTP_HOST);
